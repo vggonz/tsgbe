@@ -1,0 +1,59 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <title>TSGBE</title>
+  <meta name="description" content="Typescript GameBoy Emulator" />
+  <meta name="author" content="vggonz" />
+
+  <script src="index.ts"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <input id='file-input' hidden="true" type="file" accept=".gb" />
+
+  <div class="body">
+    <button class="switch" id="power"></button>
+    <div class="screen-border">
+      <div class="purple-line"></div>
+      <div class="blue-line"></div>
+      <div class="dot-matrix">Dot matrix with stereo sound</div>
+      <div class="screen">
+        <canvas id="canvas" width="160" height="144"></canvas>
+      </div>
+      <div class="light"></div>
+      <div class="battery">battery</div>
+    </div>
+
+    <div class="d-pad">
+      <div class="rut-up" id="up"></div>
+      <div class="rut-left" id="left"></div>
+      <div class="rut-down" id="down"></div>
+      <div class="rut-right" id="right"></div>
+      <div class="divet"></div>
+    </div>
+    <div class="b-a">
+      <div class="buttons">
+        <div class="b" id="btn-b"><span>B</span></div>
+        <div class="b a" id="btn-a"><span>A</span></div>
+      </div>
+    </div>
+    <div class="select" id="select"><span>SELECT</span></div>
+    <div class="start" id="start"><span>START</span></div>
+    <div class="speaker">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+</body>
+
+</html>
