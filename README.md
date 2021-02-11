@@ -14,3 +14,12 @@ Run `npm run build` to generate the distributable version. The compiled files wi
 ## Demo
 
 Live demo with latest build available at https://vggonz.github.io/tsgbe/
+
+## Wishlist / TODO
+
+* Add sound
+* Better UI scale for non mobile browsers
+* Game saves to browser local storage
+* Improve compatibility and fix emulation bugs
+
+**This is an original classic Game Boy emulator so no color capabilites are planned or other peripherals.**
