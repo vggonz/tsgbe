@@ -2,8 +2,8 @@ import 'regenerator-runtime/runtime';
 import { Main } from './src/app/tsgbe';
 import { Key } from './src/app/util/key';
 
-let tsgbe;
-const vibration = 5;
+let tsgbe: Main;
+const vibration = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('power') as HTMLElement;
@@ -11,50 +11,46 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener("click", (e: Event) => fileInput.click());
     fileInput.addEventListener('change', (e: Event) => openFile(e));
 
-    document.querySelector('#up').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Up);
-    });
-    document.querySelector('#up').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Up));
-    document.querySelector('#down').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Down);
-    });
-    document.querySelector('#down').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Down));
-    document.querySelector('#left').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Left);
-    });
-    document.querySelector('#left').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Left));
-    document.querySelector('#right').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Right);
-    });
-    document.querySelector('#right').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Right));
-    document.querySelector('#start').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Start);
-    });
-    document.querySelector('#start').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Start));
-    document.querySelector('#select').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.Select);
-    });
-    document.querySelector('#select').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.Select));
-    document.querySelector('#btn-a').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.A);
-    });
-    document.querySelector('#btn-a').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.A));
-    document.querySelector('#btn-b').addEventListener('mousedown', () => {
-        window.navigator.vibrate(vibration);
-        tsgbe.keys.keyDown(Key.B);
-    });
-    document.querySelector('#btn-b').addEventListener('mouseup', () => tsgbe.keys.keyUp(Key.B));
+    function keyUp(key: Key){
+      return () => tsgbe.keys.keyUp(key);
+    }
 
+    function keyDown(key: Key){
+      return () => {
+        window.navigator.vibrate(vibration);
+        tsgbe.keys.keyDown(key);
+      }
+    }
+
+    function bindButton(id: string, key: Key){
+      document.querySelector(id).addEventListener('touchstart', keyDown(key));
+      document.querySelector(id).addEventListener('touchend', keyUp(key));
+      document.querySelector(id).addEventListener('mousedown', keyDown(key));
+      document.querySelector(id).addEventListener('mouseup', keyUp(key));
+    }
+
+    bindButton('#up', Key.Up);
+    bindButton('#down', Key.Down);
+    bindButton('#left', Key.Left);
+    bindButton('#right', Key.Right);
+    bindButton('#start', Key.Start);
+    bindButton('#select', Key.Select);
+    bindButton('#btn-a', Key.A);
+    bindButton('#btn-b', Key.B);
+    
     tsgbe = new Main(<HTMLCanvasElement>document.getElementById('canvas'));
 });
 
+/*
+  13: Enter
+  16: Shift
+  90: Z
+  88: X
+  38: Up arrow
+  40: Down arrow
+  37: Left arrow
+  39: Right arrow
+*/
 document.onkeydown = function (e) {
     switch (e.keyCode) {
         case 13: tsgbe.keys.keyDown(Key.Start); break;
@@ -83,18 +79,17 @@ document.onkeyup = function (e) {
 
 async function openFile(fileInputEvent: any) {
     if (fileInputEvent.target.files.length > 0) {
-        let fileContent = await fileToByteArray(fileInputEvent.target.files[0]);
-        const data = new Uint8Array(fileContent as ArrayBuffer);
-        tsgbe.loadData(data);
+        const fileContent = await fileToByteArray(fileInputEvent.target.files[0]);
+        const name = tsgbe.loadData(new Uint8Array(fileContent as ArrayBuffer));
+        console.log(name);
         tsgbe.start();
-        console.log(tsgbe.name);
     }
 }
 
 function fileToByteArray(file: any) {
     return new Promise<string | ArrayBuffer>((resolve, reject) => {
         try {
-            let reader = new FileReader();
+            const reader = new FileReader();
             reader.readAsArrayBuffer(file);
             reader.onload = function () {
                 resolve(reader.result);
