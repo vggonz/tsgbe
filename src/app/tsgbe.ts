@@ -13,21 +13,26 @@ export class Main {
   private cartridge: Cartridge;
   private screen: RenderScreen;
   private cpu: CPU;
+  private renderId: number;
 
   constructor(canvas: HTMLCanvasElement) {
     this.keypad = new Keypad();
     this.screen = new RenderScreen(canvas);
   }
 
-  get name() { return this.cartridge.name; }
   set palette(palette: number[]) { this.screen.setPalette(palette); }
   get keys() { return this.keypad; }
   
-  loadData(data: Uint8Array){
+  loadData(data: Uint8Array): string{
     this.cartridge = this.loadCartridge(data);
     const memory = new Memory(this.cartridge, this.keypad);
     const gpu = new GPU(memory, this.screen);
     this.cpu = new CPU(memory, gpu);
+
+    this.stop();
+    this.cpu.reset();
+
+    return this.cartridge.name;
   }
 
   start() {
@@ -48,11 +53,15 @@ export class Main {
 
       // Prepare for new frame
       lastLoopTime = loopTime;
-      requestAnimationFrame(gameLoop);
+      this.renderId = requestAnimationFrame(gameLoop);
     };
 
     // Start the game loop
-    requestAnimationFrame(gameLoop);
+    this.renderId = requestAnimationFrame(gameLoop);
+  }
+
+  stop() {
+    cancelAnimationFrame(this.renderId);
   }
 
   private loadCartridge(data: Uint8Array) {
