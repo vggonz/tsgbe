@@ -35,7 +35,7 @@ export class Main {
     const gameLoop = (loopTime: number) => {
       let deltaLoopTime: number | null = null;
       if (lastLoopTime != null) {
-        deltaLoopTime = loopTime - lastLoopTime;
+        deltaLoopTime = Math.min(loopTime - lastLoopTime, 1000 / 60);
       }
 
       if (deltaLoopTime) {
