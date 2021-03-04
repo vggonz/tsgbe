@@ -9,7 +9,7 @@ export abstract class Cartridge {
     constructor(data: Uint8Array) {
         this.load(data);
         if (!this.checksum()) {
-            throw new Error('[ERROR] Invalid checksum!');
+            console.error('[ERROR] Invalid checksum!');
         }
     }
 
