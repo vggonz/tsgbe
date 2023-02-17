@@ -14,7 +14,7 @@ const OPS = {
         LD_DD_NN: function (registers: Registers, memory: Memory, reg: string) {
             registers.setReg(reg, memory.readWord(registers.PC));
             registers.PC += 3;
-            return 10;
+            return 12;
         },
         LD_R_R: function (registers: Registers, destiny: string, origin: string) {
             registers.setReg(destiny, registers.getReg(origin));
@@ -24,12 +24,12 @@ const OPS = {
         LD_R_N: function (registers: Registers, memory: Memory, destiny: string) {
             registers.setReg(destiny, memory.read(registers.PC + 1));
             registers.PC += 2;
-            return 7;
+            return 8;
         },
         LD_ADR_R: function (registers: Registers, memory: Memory, origin: string) {
             memory.write(registers.getReg(origin), memory.readWord(registers.PC));
             registers.PC += 3;
-            return 13;
+            return 12;
         },
         LD_ADR_RR: function (registers: Registers, memory: Memory, origin: string) {
             const value: number = registers.getReg(origin);
@@ -37,7 +37,7 @@ const OPS = {
             memory.write(value & 0xFF, direction);
             memory.write((value >> 8) & 0xFF, direction + 1);
             registers.PC += 3;
-            return 13;
+            return 20;
         },
         LDD_RADR_R: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             let direction = registers.getReg(destiny);
@@ -45,7 +45,7 @@ const OPS = {
             direction = direction == 0x00 ? 0xFFFF : direction - 1;
             registers.setReg(destiny, direction);
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LDI_RADR_R: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             let direction = registers.getReg(destiny);
@@ -53,7 +53,7 @@ const OPS = {
             direction = direction == 0x00 ? 0xFFFF : direction + 1;
             registers.setReg(destiny, direction);
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LDD_R_RADR: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             let direction = registers.getReg(origin);
@@ -62,7 +62,7 @@ const OPS = {
             direction = direction == 0x00 ? 0xFFFF : direction - 1;
             registers.setReg(origin, direction);
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LDI_R_RADR: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             let direction = registers.getReg(origin);
@@ -71,47 +71,47 @@ const OPS = {
             direction = direction == 0x00 ? 0xFFFF : direction + 1;
             registers.setReg(origin, direction);
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LD_R_DADR: function (registers: Registers, memory: Memory, destiny: string) {
             registers.setReg(destiny, memory.read(0xFF00 + memory.read(registers.PC + 1)));
             registers.PC += 2
-            return 15;
+            return 12;
         },
         LD_R_DR: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             registers.setReg(destiny, memory.read(0xFF00 + registers.getReg(origin)));
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LD_DADR_R: function (registers: Registers, memory: Memory, origin: string) {
             memory.write(registers.getReg(origin), 0xFF00 + memory.read(registers.PC + 1));
             registers.PC += 2;
-            return 15;
+            return 12;
         },
         LD_DR_R: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             memory.write(registers.getReg(origin), 0xFF00 + registers.getReg(destiny));
             registers.PC += 1;
-            return 15;
+            return 8;
         },
         LD_RADR_R: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             memory.write(registers.getReg(origin), registers.getReg(destiny));
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         LD_R_ADR: function (registers: Registers, memory: Memory, destiny: string) {
             registers.setReg(destiny, memory.read(memory.readWord(registers.PC)));
             registers.PC += 3;
-            return 13;
+            return 16;
         },
         LD_R_RADR: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             registers.setReg(destiny, memory.read(registers.getReg(origin)));
             registers.PC += 1;
-            return 7;
+            return 12;
         },
         LD_RADR_N: function (registers: Registers, memory: Memory, destiny: string) {
             memory.write(memory.read(registers.PC + 1), registers.getReg(destiny));
             registers.PC += 2;
-            return 10;
+            return 12;
         },
         LD_R_SPD: function (registers: Registers, memory: Memory, destiny: string) {
             let offset = memory.read(registers.PC + 1);
@@ -121,7 +121,7 @@ const OPS = {
             registers.flagH = ((registers.SP & 0x0F) + (offset & 0x0F)) > 0x0F;
             registers.flagC = (registers.getReg(destiny) & 0xFF) < (registers.SP & 0xFF);
             registers.PC += 2;
-            return 10;
+            return 12;
         }
     },
     INT: {
@@ -159,7 +159,7 @@ const OPS = {
             registers.flagH = true;
             registers.flagN = false;
             registers.PC += 1;
-            return 10;
+            return 12;
         },
         SET_R: function (registers: Registers, mask: number, reg: string) {
             registers.setReg(reg, registers.getReg(reg) | mask);
@@ -170,7 +170,7 @@ const OPS = {
             const direction = registers.getReg(reg);
             memory.write(memory.read(direction) | mask, direction);
             registers.PC += 1;
-            return 8;
+            return 16;
         },
         RES_R: function (registers: Registers, mask: number, reg: string) {
             registers.setReg(reg, registers.getReg(reg) & ~mask);
@@ -181,7 +181,7 @@ const OPS = {
             const direction = registers.getReg(reg);
             memory.write(memory.read(direction) & ~mask, direction);
             registers.PC += 1;
-            return 11;
+            return 16;
         },
         SWAP_R: function (registers: Registers, reg: string) {
             let value = registers.getReg(reg);
@@ -242,7 +242,7 @@ const OPS = {
             registers.setFlags(0);
             registers.flagZ = registers.A == 0;
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         XOR_N: function (registers: Registers, memory: Memory,) {
             registers.A ^= memory.read(registers.PC + 1);
@@ -250,7 +250,7 @@ const OPS = {
             registers.setFlags(0);
             registers.flagZ = registers.A == 0;
             registers.PC += 2;
-            return 7;
+            return 8;
         },
         OR_R_R: function (registers: Registers, reg: string) {
             registers.A |= registers.getReg(reg);
@@ -275,7 +275,7 @@ const OPS = {
             registers.flagC = false;
             registers.flagZ = registers.A == 0;
             registers.PC += 2;
-            return 7;
+            return 8;
         },
         AND_RADR: function (registers: Registers, memory: Memory, reg: string) {
             registers.A &= memory.read(registers.getReg(reg));
@@ -284,21 +284,21 @@ const OPS = {
             registers.flagC = false;
             registers.flagZ = registers.A == 0;
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         OR_R_ADR: function (registers: Registers, memory: Memory, reg: string) {
             registers.A |= memory.read(registers.getReg(reg));
             registers.setFlags(0);
             registers.flagZ = registers.A == 0;
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         OR_N: function (registers: Registers, memory: Memory) {
             registers.A |= memory.read(registers.PC + 1);
             registers.setFlags(0);
             registers.flagZ = registers.A == 0;
             registers.PC += 2;
-            return 7;
+            return 8;
         }
     },
     SHIFT: {
@@ -311,7 +311,7 @@ const OPS = {
             registers.flagH = false;
             registers.setReg(reg, ((value << 1) | carry) & 0xFF);
             registers.PC += 1;
-            return 4;
+            return zero ? 8 : 4;
         },
         RLC_RADR: function (registers: Registers, memory: Memory, reg: string) {
             const direction = registers.getReg(reg);
@@ -323,7 +323,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(((value << 1) | carry) & 0xFF, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         SLA: function (registers: Registers, reg: string) {
             const value = registers.getReg(reg) << 1;
@@ -344,7 +344,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(value & 0xFF, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         SRA: function (registers: Registers, reg: string) {
             const value = registers.getReg(reg);
@@ -367,7 +367,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(result, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         SRL: function (registers: Registers, reg: string) {
             const value = registers.getReg(reg);
@@ -390,7 +390,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(result, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         RL: function (registers: Registers, reg: string, zero: boolean) {
             const value = (registers.getReg(reg) << 1) | (registers.flagC ? 1 : 0);
@@ -400,7 +400,7 @@ const OPS = {
             registers.flagH = false;
             registers.setReg(reg, value & 0xFF);
             registers.PC += 1;
-            return 8;
+            return zero ? 8 : 4;
         },
         RL_RADR: function (registers: Registers, memory: Memory, reg: string) {
             const direction = registers.getReg(reg);
@@ -411,7 +411,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(value & 0xFF, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         RRC: function (registers: Registers, reg: string, zero: boolean) {
             const value = registers.getReg(reg);
@@ -422,7 +422,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(reg, result & 0xFF);
             registers.PC += 1;
-            return 4;
+            return zero ? 8 : 4;
         },
         RRC_RADR: function (registers: Registers, memory: Memory, reg: string) {
             const direction = registers.getReg(reg);
@@ -434,7 +434,7 @@ const OPS = {
             registers.flagH = false;
             memory.write(result & 0xFF, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         },
         RR: function (registers: Registers, reg: string, zero: boolean) {
             const value = registers.getReg(reg);
@@ -445,7 +445,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(reg, result & 0xFF);
             registers.PC += 1;
-            return 4;
+            return zero ? 8 : 4;
         },
         RR_RADR: function (registers: Registers, memory: Memory, reg: string) {
             const direction = registers.getReg(reg);
@@ -457,13 +457,13 @@ const OPS = {
             registers.flagH = false;
             memory.write(result & 0xFF, direction);
             registers.PC += 1;
-            return 15;
+            return 16;
         }
     },
     JUMP: {
         JP_ADR: function (registers: Registers, memory: Memory) {
             registers.PC = memory.readWord(registers.PC);
-            return 10;
+            return 16;
         },
         JP_RADR: function (registers: Registers, reg: string) {
             registers.PC = registers.getReg(reg);
@@ -472,14 +472,20 @@ const OPS = {
         JP_CC0_ADR: function (registers: Registers, memory: Memory, flag: string) {
             const direction = memory.readWord(registers.PC);
             registers.PC += 3;
-            if (!registers.getFlag(flag)) registers.PC = direction;
-            return 10;
+            if (!registers.getFlag(flag)){
+              registers.PC = direction;
+              return 16;
+            }
+            return 12;
         },
         JP_CC1_ADR: function (registers: Registers, memory: Memory, flag: string) {
             const direction = memory.readWord(registers.PC);
             registers.PC += 3;
-            if (registers.getFlag(flag)) registers.PC = direction;
-            return 10;
+            if (registers.getFlag(flag)){
+              registers.PC = direction;
+              return 16;
+            }
+            return 12;
         },
         JR_N: function (registers: Registers, memory: Memory) {
             let offset = memory.read(registers.PC + 1);
@@ -496,7 +502,7 @@ const OPS = {
                 registers.PC += offset;
                 return 12;
             }
-            return 7;
+            return 8;
         },
         JR_CC1_N: function (registers: Registers, memory: Memory, flag: string) {
             let offset = memory.read(registers.PC + 1);
@@ -506,7 +512,7 @@ const OPS = {
                 registers.PC += offset;
                 return 12;
             }
-            return 7;
+            return 8;
         },
         CALL_ADR: function (registers: Registers, memory: Memory) {
             const direction = memory.readWord(registers.PC);
@@ -516,7 +522,7 @@ const OPS = {
             registers.SP--;
             memory.write(registers.PC & 0x00FF, registers.SP);
             registers.PC = direction;
-            return 17;
+            return 24;
         },
         CALL_CC0_ADR: function (registers: Registers, memory: Memory, flag: string) {
             const direction = memory.readWord(registers.PC);
@@ -527,9 +533,9 @@ const OPS = {
                 registers.SP--;
                 memory.write(registers.PC & 0x00FF, registers.SP);
                 registers.PC = direction;
-                return 17;
+                return 24;
             }
-            return 10;
+            return 12;
         },
         CALL_CC1_ADR: function (registers: Registers, memory: Memory, flag: string) {
             const direction = memory.readWord(registers.PC);
@@ -540,9 +546,9 @@ const OPS = {
                 registers.SP--;
                 memory.write(registers.PC & 0x00FF, registers.SP);
                 registers.PC = direction;
-                return 17;
+                return 24;
             }
-            return 10;
+            return 12;
         },
         PUSH_RR: function (registers: Registers, memory: Memory, reg: string) {
             const value = registers.getReg(reg);
@@ -551,7 +557,7 @@ const OPS = {
             registers.SP--;
             memory.write(value & 0x00FF, registers.SP);
             registers.PC += 1;
-            return 11;
+            return 16;
         },
         POP_RR: function (registers: Registers, memory: Memory, reg: string) {
             const low = memory.read(registers.SP);
@@ -560,7 +566,7 @@ const OPS = {
             registers.SP++;
             registers.setReg(reg, (high << 8) | low);
             registers.PC += 1;
-            return 11;
+            return 12;
         },
         RET_CC0_ADR: function (registers: Registers, memory: Memory, flag: string) {
             registers.PC += 1;
@@ -570,9 +576,9 @@ const OPS = {
                 const high = memory.read(registers.SP);
                 registers.SP++;
                 registers.PC = (high << 8) | low;
-                return 11;
+                return 20;
             }
-            return 5;
+            return 8;
         },
         RET_CC1_ADR: function (registers: Registers, memory: Memory, flag: string) {
             registers.PC += 1;
@@ -582,9 +588,9 @@ const OPS = {
                 const high = memory.read(registers.SP);
                 registers.SP++;
                 registers.PC = (high << 8) | low;
-                return 11;
+                return 20;
             }
-            return 5;
+            return 8;
         },
         RET_ADR: function (registers: Registers, memory: Memory) {
             registers.PC += 1;
@@ -593,7 +599,7 @@ const OPS = {
             const high = memory.read(registers.SP);
             registers.SP++;
             registers.PC = (high << 8) | low;
-            return 10;
+            return 16;
         },
         RETI: function (registers: Registers, memory: Memory) {
             registers.PC += 1;
@@ -603,7 +609,7 @@ const OPS = {
             registers.SP++;
             registers.PC = (high << 8) | low;
             registers.flagIME = true;
-            return 10;
+            return 16;
         },
         RST: function (registers: Registers, memory: Memory, direction: number) {
             registers.PC += 1;
@@ -612,7 +618,7 @@ const OPS = {
             registers.SP--;
             memory.write(registers.PC & 0x00FF, registers.SP);
             registers.PC = direction;
-            return 11;
+            return 16;
         }
     },
     ADD: {
@@ -635,7 +641,7 @@ const OPS = {
             registers.flagN = true;
             memory.write(result, direction);
             registers.PC += 1;
-            return 11;
+            return 12;
         },
         INC_R: function (registers: Registers, reg: string) {
             const value = registers.getReg(reg);
@@ -656,17 +662,17 @@ const OPS = {
             registers.flagN = false;
             memory.write(result, direction);
             registers.PC += 1;
-            return 11;
+            return 12;
         },
         DEC_RR: function (registers: Registers, reg: string) {
             registers.setReg(reg, (registers.getReg(reg) - 1) & 0xFFFF);
             registers.PC += 1;
-            return 6;
+            return 8;
         },
         INC_RR: function (registers: Registers, reg: string) {
             registers.setReg(reg, (registers.getReg(reg) + 1) & 0xFFFF);
             registers.PC += 1;
-            return 6;
+            return 8;
         },
         ADD_R_R: function (registers: Registers, destiny: string, origin: string) {
             const valueOrigin = registers.getReg(origin);
@@ -690,7 +696,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(destiny, value & 0xFF);
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         ADD_RR_RR: function (registers: Registers, destiny: string, origin: string) {
             const valueOrigin = registers.getReg(origin);
@@ -701,7 +707,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(destiny, value & 0xFFFF);
             registers.PC += 1;
-            return 11;
+            return 8;
         },
         ADD_R_NN: function (registers: Registers, memory: Memory, reg: string) {
             let value = memory.read(registers.PC + 1);
@@ -712,7 +718,7 @@ const OPS = {
             registers.flagC = ((registers.getReg(reg) & 0xFF) + (value & 0xFF)) > 0xFF;
             registers.setReg(reg, result & 0xFFFF);
             registers.PC += 2;
-            return 7;
+            return 16;
         },
         ADD_R_N: function (registers: Registers, memory: Memory, reg: string) {
             const value = memory.read(registers.PC + 1);
@@ -723,7 +729,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(reg, result & 0xFF);
             registers.PC += 2;
-            return 7;
+            return 8;
         },
         CP_R: function (registers: Registers, reg: string) {
             const value = registers.getReg(reg);
@@ -741,7 +747,7 @@ const OPS = {
             registers.flagH = (registers.A & 0x0F) < (value & 0x0F);
             registers.flagN = true;
             registers.PC += 1;
-            return 7;
+            return 8;
         },
         CP_N: function (registers: Registers, memory: Memory) {
             const value = memory.read(registers.PC + 1);
@@ -750,7 +756,7 @@ const OPS = {
             registers.flagH = (registers.A & 0x0F) < (value & 0x0F);
             registers.flagN = true;
             registers.PC += 2;
-            return 7;
+            return 8;
         },
         SBC_R_R: function (registers: Registers, destiny: string, origin: string) {
             const valueOrigin = registers.getReg(origin);
@@ -786,7 +792,7 @@ const OPS = {
             registers.flagN = true;
             registers.setReg(destiny, value & 0xFF);
             registers.PC += 1;
-            return 4;
+            return 8;
         },
         SBC_R_N: function (registers: Registers, memory: Memory, reg: string) {
             const valueOrigin = memory.read(registers.PC + 1);
@@ -798,7 +804,7 @@ const OPS = {
             registers.flagN = true;
             registers.setReg(reg, value & 0xFF);
             registers.PC += 2;
-            return 4;
+            return 8;
         },
         ADC_R_R: function (registers: Registers, destiny: string, origin: string) {
             const valueOrigin = registers.getReg(origin);
@@ -822,7 +828,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(destiny, value & 0xFF);
             registers.PC += 1;
-            return 4;
+            return 8;
         },
         ADC_R_N: function (registers: Registers, memory: Memory, reg: string) {
             const valueOrigin = memory.read(registers.PC + 1);
@@ -834,7 +840,7 @@ const OPS = {
             registers.flagN = false;
             registers.setReg(reg, value & 0xFF);
             registers.PC += 2;
-            return 4;
+            return 8;
         },
         SUB_R_N: function (registers: Registers, memory: Memory, reg: string) {
             const valueOrigin = memory.read(registers.PC + 1);
@@ -846,7 +852,7 @@ const OPS = {
             registers.flagN = true;
             registers.setReg(reg, value & 0xFF);
             registers.PC += 2;
-            return 4;
+            return 8;
         },
         SBC_R_RADR: function (registers: Registers, memory: Memory, destiny: string, origin: string) {
             const valueOrigin = memory.read(registers.getReg(origin));
@@ -858,7 +864,7 @@ const OPS = {
             registers.flagN = true;
             registers.setReg(destiny, value & 0xFF);
             registers.PC += 1;
-            return 4;
+            return 8;
         },
         DAA: function (registers: Registers) {
             let result = registers.A;
