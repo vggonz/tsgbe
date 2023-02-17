@@ -118,7 +118,8 @@ const OPS = {
             if (offset > 127) offset -= 256;
             registers.setReg(destiny, registers.SP + offset);
             registers.setFlags(0);
-            registers.flagC = registers.getReg(destiny) > 0xFFFF;
+            registers.flagH = ((registers.SP & 0x0F) + (offset & 0x0F)) > 0x0F;
+            registers.flagC = (registers.getReg(destiny) & 0xFF) < (registers.SP & 0xFF);
             registers.PC += 2;
             return 10;
         }
@@ -305,7 +306,7 @@ const OPS = {
             const value = registers.getReg(reg);
             const carry = (value & (0x01 << 7)) >> 7;
             registers.flagC = (value & 0x80) != 0;
-            if (zero) registers.flagZ = (value & 0xFF) == 0;
+            registers.flagZ = zero ? (value & 0xFF) == 0 : false;
             registers.flagN = false;
             registers.flagH = false;
             registers.setReg(reg, ((value << 1) | carry) & 0xFF);
@@ -393,7 +394,7 @@ const OPS = {
         },
         RL: function (registers: Registers, reg: string, zero: boolean) {
             const value = (registers.getReg(reg) << 1) | (registers.flagC ? 1 : 0);
-            if (zero) registers.flagZ = (value & 0xFF) == 0;
+            registers.flagZ = zero ? (value & 0xFF) == 0 : false;
             registers.flagC = value > 0xFF;
             registers.flagN = false;
             registers.flagH = false;
@@ -415,7 +416,7 @@ const OPS = {
         RRC: function (registers: Registers, reg: string, zero: boolean) {
             const value = registers.getReg(reg);
             const result = (value >> 1) | ((value & 0x01) << 7);
-            if (zero) registers.flagZ = (result & 0xFF) == 0;
+            registers.flagZ = zero ? (result & 0xFF) == 0 : false;
             registers.flagC = (value & 0x01) == 0x01;
             registers.flagH = false;
             registers.flagN = false;
@@ -438,7 +439,7 @@ const OPS = {
         RR: function (registers: Registers, reg: string, zero: boolean) {
             const value = registers.getReg(reg);
             const result = (value >> 1) | ((registers.flagC ? 1 : 0) << 7);
-            if (zero) registers.flagZ = result == 0;
+            registers.flagZ = zero ? (result & 0xFF) == 0 : false;
             registers.flagC = (value & 0x01) == 0x01;
             registers.flagH = false;
             registers.flagN = false;
@@ -640,7 +641,7 @@ const OPS = {
             const value = registers.getReg(reg);
             const result = (value + 1) & 0xFF;
             registers.flagZ = result === 0;
-            registers.flagH = ((value & 0xF) + 1 >> 4) === 0;
+            registers.flagH = (((value & 0xF) + 1) >> 4) === 1;
             registers.flagN = false;
             registers.setReg(reg, result);
             registers.PC += 1;
@@ -651,7 +652,7 @@ const OPS = {
             const value = memory.read(direction);
             const result = (value + 1) & 0xFF;
             registers.flagZ = result === 0;
-            registers.flagH = ((value & 0xF) + 1 >> 4) === 0;
+            registers.flagH = (((value & 0xF) + 1) >> 4) === 1;
             registers.flagN = false;
             memory.write(result, direction);
             registers.PC += 1;
@@ -707,7 +708,8 @@ const OPS = {
             if (value > 127) value -= 256;
             const result = registers.getReg(reg) + value;
             registers.setFlags(0);
-            registers.flagC = result > 0xFFFF;
+            registers.flagH = ((registers.getReg(reg) & 0x0F) + (value & 0x0F)) > 0x0F;
+            registers.flagC = ((registers.getReg(reg) & 0xFF) + (value & 0xFF)) > 0xFF;
             registers.setReg(reg, result & 0xFFFF);
             registers.PC += 2;
             return 7;
@@ -716,8 +718,8 @@ const OPS = {
             const value = memory.read(registers.PC + 1);
             const result = registers.getReg(reg) + value;
             registers.flagZ = (result & 0xFF) == 0;
-            registers.flagC = result > 0xFFFF;
-            registers.flagH = (result & 0x0F) + (value & 0x0F) > 0x0F;
+            registers.flagC = result > 0xFF;
+            registers.flagH = ((registers.getReg(reg) & 0x0F) + (value & 0x0F)) > 0x0F;
             registers.flagN = false;
             registers.setReg(reg, result & 0xFF);
             registers.PC += 2;
@@ -755,7 +757,7 @@ const OPS = {
             const valueDestiny = registers.getReg(destiny);
             const value = valueDestiny - valueOrigin - (registers.flagC ? 1 : 0);
             registers.flagZ = (value & 0xFF) == 0;
-            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin - (registers.flagC ? 1 : 0)) & 0x0F);
+            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin & 0x0F) + (registers.flagC ? 1 : 0));
             registers.flagC = value < 0;
             registers.flagN = true;
             registers.setReg(destiny, value & 0xFF);
@@ -791,7 +793,7 @@ const OPS = {
             const valueDestiny = registers.getReg(reg);
             const value = valueDestiny - valueOrigin - (registers.flagC ? 1 : 0);
             registers.flagZ = (value & 0xFF) == 0;
-            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin - (registers.flagC ? 1 : 0)) & 0x0F);
+            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin & 0x0F) + (registers.flagC ? 1 : 0));
             registers.flagC = value < 0;
             registers.flagN = true;
             registers.setReg(reg, value & 0xFF);
@@ -804,7 +806,7 @@ const OPS = {
             const value = valueDestiny + valueOrigin + (registers.flagC ? 1 : 0);
             registers.flagZ = (value & 0xFF) == 0;
             registers.flagH = (valueDestiny & 0x0F) + (valueOrigin & 0x0F) + (registers.flagC ? 1 : 0) > 0x0F;
-            registers.flagC = value < 0;
+            registers.flagC = value > 0xFF;
             registers.flagN = false;
             registers.setReg(destiny, value & 0xFF);
             registers.PC += 1;
@@ -828,7 +830,7 @@ const OPS = {
             const value = valueDestiny + valueOrigin + (registers.flagC ? 1 : 0);
             registers.flagZ = (value & 0xFF) == 0;
             registers.flagH = (valueDestiny & 0x0F) + (valueOrigin & 0x0F) + (registers.flagC ? 1 : 0) > 0x0F;
-            registers.flagC = value < 0;
+            registers.flagC = value > 0xFF;
             registers.flagN = false;
             registers.setReg(reg, value & 0xFF);
             registers.PC += 2;
@@ -851,7 +853,7 @@ const OPS = {
             const valueDestiny = registers.getReg(destiny);
             const value = valueDestiny - valueOrigin - (registers.flagC ? 1 : 0);
             registers.flagZ = (value & 0xFF) == 0;
-            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin - (registers.flagC ? 1 : 0)) & 0x0F);
+            registers.flagH = (valueDestiny & 0x0F) < ((valueOrigin & 0x0F) + (registers.flagC ? 1 : 0));
             registers.flagC = value < 0;
             registers.flagN = true;
             registers.setReg(destiny, value & 0xFF);
@@ -865,11 +867,11 @@ const OPS = {
             if (registers.flagH) correction |= 0x06;
             if (registers.flagC) correction |= 0x60;
             if (registers.flagN) {
+              result -= correction;
+            } else {
               if ((result & 0x0F) > 0x09) correction |= 0x06;
               if (result > 0x99) correction |= 0x60;
               result += correction;
-            } else {
-              result -= correction;
             }
 
             registers.flagZ = (result & 0xFF) == 0;
