@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function bindButton(id: string, key: Key){
-      document.querySelector(id).addEventListener('touchstart', keyDown(key));
-      document.querySelector(id).addEventListener('touchend', keyUp(key));
-      document.querySelector(id).addEventListener('mousedown', keyDown(key));
-      document.querySelector(id).addEventListener('mouseup', keyUp(key));
+      document.querySelector(id)!.addEventListener('touchstart', keyDown(key));
+      document.querySelector(id)!.addEventListener('touchend', keyUp(key));
+      document.querySelector(id)!.addEventListener('mousedown', keyDown(key));
+      document.querySelector(id)!.addEventListener('mouseup', keyUp(key));
     }
 
     bindButton('#up', Key.Up);
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bindButton('#select', Key.Select);
     bindButton('#btn-a', Key.A);
     bindButton('#btn-b', Key.B);
-    
+ 
     tsgbe = new Main(<HTMLCanvasElement>document.getElementById('canvas'));
 });
 
